@@ -331,17 +331,206 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 ---
 
-## Programmation orientée objet
+## Programmation Orientée Objet (POO)
 
 **Comment déclare-t-on une classe et un objet en PHP ?**
 
+On définit une classe grâce au mot-clé ``class``, suivi du nom de la classes et d’accolades ``{}``.
+
+Pour créer un objet on utilisera ``new NomDeClasse()``.
+
+```php
+
+class MyClass
+{
+    // déclaration d'une propriété
+    public $var = 'une valeur par défaut';
+
+    // déclaration des méthodes
+    public function displayVar() {
+        echo $this->var;
+    }
+}
+
+// Instanciation d'un objet
+$my_obj = new MyClass();
+$my_obj->displayVar(); // -> une valeur par défaut
+
+```
+
 **Quelle est la différence entre public, protected et private ?**
+
+``public`` : accessible de partout (dans la classe, les classes enfants, et en dehors).
+:
+``protected`` : accessible uniquement dans la classe et les classes enfants.
+
+``private`` : accessible uniquement dans la classe où c’est défini.
+
+```php
+
+class ParentClass {
+    public $x = 1;
+    protected $y = 2;
+    private $z = 3;
+
+    public function afficher() {
+        echo $this->x; // ok
+        echo $this->y; // ok
+        echo $this->z; // ok
+    }
+}
+
+class ChildClass extends ParentClass {
+    public function afficherChild() {
+        echo $this->x; // ok
+        echo $this->y; // ok (protected)
+        echo $this->z; // erreur (private)
+    }
+}
+
+$obj = new ParentClass();
+
+echo $obj->x; // ok
+echo $obj->y; // erreur
+echo $obj->z; // erreur
+
+```
 
 **Qu’est-ce qu’un constructeur et un destructeur ?**
 
+``Constructeur (__construct)`` : méthode spéciale appelée automatiquement lors de la création d’un objet. Sert à initialiser ses propriétés.
+
+``Destructeur (__destruct)`` : méthode appelée automatiquement quand l’objet est détruit (en fin de script par exemple).
+
+```php
+
+class User {
+    public $name;
+
+    public function __construct($name) {
+        $this->name = $name;
+        echo "Utilisateur {$this->name} créé !";
+    }
+
+    public function __destruct() {
+        echo "Destruction de {$this->name}";
+    }
+}
+
+$user = new User("Thomas");
+// -> "Utilisateur Thomas créé !"
+// À la fin du script : "Destruction de Thomas"
+
+```
+
 **Qu’est-ce que l’héritage et comment se fait-il en PHP ?**
 
+L’héritage permet à une classe enfant d’hériter des propriétés et méthodes publiques ou protégées d’une classe parent grâce au mot-clé ``extends``.
+
+```php
+
+class MyParentClass
+{
+    public $name = 'Thomas';
+
+    public function sayMyName() {
+        echo "Bonjour, je suis {$this->name} !";
+    }
+}
+
+class MyKidClass extends MyParentClass
+{
+    public $age = 30;
+
+    public function sayAge() {
+        echo "J'ai {$this->age} ans.";
+    }
+}
+
+$child = new MyKidClass();
+$child->sayMyName(); // Hérité de MyParentClass
+$child->sayAge();
+
+
+```
+
 **Qu’est-ce que l’interface et la classe abstraite ?**
+
+En PHP, une interface (définie avec le mot-clé ``interface``) sert uniquement à définir un contrat : elle ne contient que la liste des méthodes à implémenter, sans corps. Une classe qui implémente une interface avec le mot-clé implements est obligée d’écrire le code de toutes les méthodes définies dans cette interface. Cela permet de garantir qu’une ou plusieurs classes respectent une même structure.
+
+```php
+
+interface Loggable {
+    public function log($message);
+}
+
+class FileLogger implements Loggable {
+    public function log($message) {
+        echo "Écriture dans un fichier : $message";
+    }
+}
+
+class EmailLogger implements Loggable {
+    public function log($message) {
+        echo "Envoi d'un email avec le message : $message";
+    }
+}
+
+```
+
+À l’inverse, une classe abstraite (définie avec le mot-clé ``abstract``) peut contenir à la fois des méthodes déjà implémentées et des méthodes abstraites (déclarées mais non définies) que ses classes enfants devront obligatoirement compléter. Une classe abstraite ne peut pas être instanciée directement : elle sert de modèle pour factoriser du comportement commun.
+
+```php
+
+abstract class Document {
+    protected $title;
+    protected $createdAt;
+
+    public function __construct($title) {
+        $this->title = $title;
+        $this->createdAt = date('Y-m-d');
+    }
+
+    abstract public function generateContent();
+
+    public function getTitle() {
+        return $this->title;
+    }
+
+    public function getCreationDate() {
+        return $this->createdAt;
+    }
+}
+
+class Invoice extends Document {
+    private $amount;
+
+    public function __construct($title, $amount) {
+        parent::__construct($title);
+        $this->amount = $amount;
+    }
+
+    public function generateContent() {
+        return "Facture : {$this->title}, montant : {$this->amount}€, créée le {$this->createdAt}.";
+    }
+}
+
+class Report extends Document {
+    private $content;
+
+    public function __construct($title, $content) {
+        parent::__construct($title);
+        $this->content = $content;
+    }
+
+    public function generateContent() {
+        return "Rapport : {$this->title}, contenu : {$this->content}. Créé le {$this->createdAt}.";
+    }
+}
+
+```
+
+En résumé : une interface définit uniquement des obligations sans aucune logique, tandis qu’une classe abstraite définit à la fois des obligations et peut contenir du code réutilisable.
 
 ---
 
@@ -349,7 +538,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 **Quelle est la différence entre une erreur et une exception ?**
 
-**Comment utiliser ``try``, ``catch``, ``finally ``?**
+**Comment utiliser ``try``, ``catch``, ``finally`` ?**
 
 **Quelle est la fonction pour définir une fonction de gestion d’erreur personnalisée ?**
 

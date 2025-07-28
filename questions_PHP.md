@@ -269,9 +269,65 @@ $closure("Thomas"); // -> Salut, Thomas !
 
 **À quoi sert ``$_POST`` et ``$_GET`` ?**
 
+``$_POST`` : contient les données envoyées par un formulaire via la méthode POST.
+Ces données ne sont pas visibles dans l'URL.
+
+``$_GET`` : contient les données envoyées via l’URL (paramètres de requête).
+Exemple : ``page.php?id=5`` → ``$_GET['id']`` vaut ``5`` .
+
+```php
+
+$name = $_POST['name']; // Depuis un formulaire POST
+
+$id = $_GET['id']; // Depuis l'URL
+
+```
+
 **Quelle est la différence entre ``$_REQUEST`` et ``$_POST`` ?**
 
+``$_REQUEST`` est une variable superglobales qui est un tableau associatif contenant par défaut le contenu des variables ``$_GET``, ``$_POST`` et ``$_COOKIE``.
+
+``$_POST`` contient uniquement les données envoyées par POST.
+
+Attention : Utiliser ``$_REQUEST`` peut être dangereux car on ne sait pas d’où provient la donnée (``GET``/``POST``/``COOKIE``). Il est recommandé d’utiliser explicitement ``$_POST`` ou ``$_GET``.
+
 **Comment sécuriser la récupération de données envoyées par un formulaire ?**
+
+Ne jamais faire confiance aux données utilisateurs ! Pour cela :
+
+-- Utiliser des requêtes préparées (PDO) ou des fonctions d’échappement pour la base de données (protection aux injections SQL).
+
+-- Échapper les caractères spéciaux avant affichage (protection XSS).
+
+-- Valider et filtrer les données (ex. filter_var).
+
+-- Ne jamais afficher directement une donnée reçue sans la filtrer.
+
+```html
+
+<form method="post" action="traitement.php">
+    <input type="text" name="name">
+    <input type="email" name="email">
+    <button type="submit">Envoyer</button>
+</form>
+
+```
+
+```php
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Nettoyage et validation
+    $name = htmlspecialchars(trim($_POST['name']));
+    $email = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
+
+    if ($email === false) {
+        echo "Email invalide.";
+    } else {
+        echo "Bonjour, {$name} !";
+    }
+}
+
+```
 
 ---
 

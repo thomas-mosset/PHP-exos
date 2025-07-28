@@ -178,11 +178,90 @@ empty(0); // -> TRUE
 
 **Comment définit-on une fonction en PHP ?**
 
+On définit une fonction grâce au mot-clé ``function``, suivi du nom de la fonction, de parenthèses ``()`` (pour les paramètres), puis d’accolades ``{}``.
+
+```php
+
+function sayHello($name) {
+    echo "Bonjour {$name} !";
+}
+
+sayHello("Thomas"); // -> Bonjour Thomas !
+
+```
+
 **Quelle est la différence entre les variables locales, globales et superglobales ?**
+
+Les variables ``locales`` sont définies à l’intérieur d’une fonction et ne seront accessibles qu'au sein de cette même fonction.
+
+Les variables ``globales`` sont définies à l'extérieur d’une fonction et ne seront pas automatiquement accessible dans une fonction. (Il faudra utiliser ``global`` ou ``$GLOBALS``.)
+
+Les variables ``superglobales`` sont prédéfinies et accessibles partout. (Ex. : ``$_POST``, ``$_GET``, ``$_SESSION``, ``$GLOBALS``, etc.).
+
+```php
+
+// Variable globale
+$global_var = 1;
+
+function test() {
+    // Variable locale
+    $local_var = 3;
+
+    echo $local_var; // Accessible ici
+    echo $global_var; // Erreur : inaccessible par défaut
+}
+
+test();
+
+echo $local_var; // Erreur : inaccessible ici
+
+
+// Pour accéder à une variable globale dans une fonction :
+function testGlobal() {
+    global $global_var; // Rend la variable globale accessible
+    echo $global_var;
+}
+
+```
 
 **Qu’est-ce que ``$GLOBALS`` et quand l’utiliser ?**
 
+``$GLOBALS`` est un tableau associatif superglobal contenant toutes les variables globales accessibles partout. Il permet d’accéder aux variables globales à l’intérieur d’une fonction sans utiliser ``global``.
+
+On l'utilisera rarement ! C’est pratique pour accéder ou modifier des variables globales sans les passer en paramètres, mais ce n’est pas une bonne pratique moderne. On préfèrera généralement passer des paramètres aux fonctions ou utiliser des classes/objets.
+
+```php
+
+$user = "Jane Doe";
+
+function setUser($name) {
+    $GLOBALS['user'] = $name; // Change la variable globale
+}
+
+function greet() {
+    echo "Bonjour, " . $GLOBALS['user'] . " !";
+}
+
+setUser("Thomas");
+greet(); // Bonjour, Thomas !
+
+```
+
 **Qu’est-ce qu’une fonction anonyme en PHP ?**
+
+Une fonction anonyme (ou *closure*) est une fonction sans nom, souvent affectée à une variable ou utilisée comme argument.
+
+```php
+
+$message = "Salut";
+
+$closure = function($name) use ($message) {
+    echo "{$message}, {$name} !";
+};
+
+$closure("Thomas"); // -> Salut, Thomas !
+
+```
 
 ---
 

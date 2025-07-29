@@ -603,11 +603,66 @@ echo $varNonDefinie;
 
 **Comment ouvrir, lire et écrire dans un fichier en PHP ?**
 
+On utilise les fonctions ``fopen()``, ``fgets()``, et ``fclose()`` pour ouvrir, lire et écrire dans un fichier en PHP. Pour simplifier, on peut aussi utiliser ``file_get_contents()`` (lecture directe) ou ``file_put_contents()`` (écriture directe).
+
+```php
+
+$nomFichier = "notes.txt";
+
+// lecture ligne par ligne d’un fichier texte
+function lireFichier($nomFichier) {
+    $handle = fopen($nomFichier, 'r'); // 'r' = lecture seule
+    if ($handle) {
+        while (!feof($handle)) { // Tant qu'on n'est pas à la fin du fichier
+            $ligne = fgets($handle); // Lit une ligne
+            echo $ligne . "<br>";
+        }
+        fclose($handle);
+    }
+}
+
+// Lecture plus simple avec file_get_contents()
+echo nl2br(file_get_contents("notes.txt"));
+
+// Écriture dans un fichier (exemple d’ajout d’un texte)
+$handle = fopen("notes.txt", "a"); // 'a' = append (ajoute à la fin)
+fwrite($handle, "Nouvelle ligne\n");
+fclose($handle);
+
+```
+
 **Quelle est la différence entre une session et un cookie ?**
+
+``Session`` : les données sont stockées côté serveur (dans un fichier temporaire). Le navigateur ne reçoit qu’un identifiant de session.
+
+``Cookie`` : les données sont stockées côté client (dans le navigateur).
+
+En pratique : une ``session`` sera utile pour stocker l’état de connexion d’un utilisateur. Et un ``cookie`` sera utile pour se souvenir d’une préférence utilisateur (ex : thème sombre).
 
 **Comment démarrer une session en PHP ?**
 
+On utilise ``session_start()``. On l'utilisera avant toute sortie HTML (en tout début de script).
+
+```php
+
+session_start(); // démarrage d'une session
+$_SESSION['nom'] = 'Thomas'; // information ajoutée à la session
+
+echo "Bonjour " . $_SESSION['nom']; // cas d'utilisation d'une information de session
+
+```
+
 **Comment détruire une session ?**
+
+On utilise ``session_destroy()``. Souvent, on supprimera aussi les variables.
+
+```php
+
+$_SESSION = [];
+session_unset();
+session_destroy();
+
+```
 
 ---
 

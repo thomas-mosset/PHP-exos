@@ -1,4 +1,4 @@
-# FAQ - Questions et Concepts Clés sur l'accessibilité numérique
+# FAQ - Questions et Concepts Clés sur PHP
 
 Ce *repository* regroupe une série de questions et d'exercices autour des concepts fondamentaux de PHP.
 

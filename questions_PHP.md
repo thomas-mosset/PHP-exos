@@ -888,10 +888,147 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 **Quelle est la différence entre PHP procédural et PHP orienté objet ?**
 
+Le ``PHP procédural`` se base sur des fonctions et des instructions exécutées les unes après les autres.
+
+Le ``PHP orienté objet (POO)`` utilise des classes, objets, propriétés et méthodes pour organiser le code de manière modulaire et réutilisable.
+
+```php
+
+// Procédural
+
+function soustraction($a, $b) {
+    return $a - $b;
+}
+
+echo soustraction(2, 3);
+
+// Orienté objet
+class Calculatrice {
+    public function addition($a, $b) {
+        return $a + $b;
+    }
+}
+
+$calc = new Calculatrice();
+echo $calc->addition(2, 3);
+
+```
+
 **Comment activer et afficher les erreurs en PHP pour déboguer ?**
 
-**À quoi sert Composer dans l’écosystème PHP ?**
+On peut activer l’affichage des erreurs directement dans le code pendant le développement :
 
-**Qu’est-ce que PDO et à quoi ça sert ?**
+```php
+
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+```
+
+Ou dans le fichier ``php.ini`` :
+
+```ini
+
+display_errors = On
+error_reporting = E_ALL
+
+```
+
+En production, il est recommandé de désactiver l’affichage et de les enregistrer dans un fichier log pour éviter d’exposer des informations sensibles.
+
+**À quoi sert ``Composer`` dans l’écosystème PHP ?**
+
+``Composer`` est le gestionnaire de dépendances pour PHP. Il permet d’installer, mettre à jour et gérer automatiquement les bibliothèques externes.
+
+```bash
+
+composer require altorouter/altorouter
+
+```
+
+**Qu’est-ce que ``PDO`` et à quoi ça sert ?**
+
+``PDO`` (*PHP Data Objects*) est une interface orientée objet représentant une connexion entre PHP et un serveur de base de données. Elle permet de travailler avec différentes bases (MySQL, PostgreSQL, SQLite, etc.) via la même API et de sécuriser les requêtes grâce aux requêtes préparées.
+
+```php
+
+$pdo = new PDO("mysql:host=localhost;dbname=test", "root", "");
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id");
+$stmt->execute(['id' => 1]);
+$data = $stmt->fetch();
+
+```
 
 **Que fait la fonction ``var_dump()`` ?**
+
+``var_dump()`` affiche des informations détaillées sur une variable : type, taille et contenu. Il est très utile pour le débogage.
+
+```php
+
+$tab = ["php", 123, true];
+var_dump($tab);
+
+```
+
+**Qu’est-ce qu’un namespace en PHP ?**
+
+Un ``namespace`` (espace de noms) permet d’organiser le code et d’éviter les conflits de noms entre classes ou fonctions dans des projets complexes.
+
+On le déclare en haut du fichier :
+
+```php
+
+namespace App\Controllers;
+
+class UserController {
+    public function index() {
+        echo "Page utilisateur";
+    }
+}
+
+```
+
+On utilise ensuite use pour importer une classe d’un autre namespace :
+
+```php
+
+use App\Controllers\UserController;
+
+$controller = new UserController();
+$controller->index();
+
+```
+
+**Qu’est-ce que l’autoloading (PSR-4) en PHP ?**
+
+L’``autoloading`` (chargement automatique) permet de charger automatiquement les classes PHP sans avoir à faire de ``require`` ou ``include`` manuels.
+
+La norme PSR-4 définit une convention où la structure des namespaces correspond à la structure des dossiers du projet.
+
+Dans ``composer.json``, on configure l’*autoload* :
+
+```json
+
+"autoload": {
+    "psr-4": {
+        "App\\": "src/"
+    }
+}
+
+```
+
+On exécute :
+
+```bash
+
+composer dump-autoload
+
+```
+
+Et on inclut l’autoload une seule fois dans le projet :
+
+```php
+
+require 'vendor/autoload.php';
+
+```

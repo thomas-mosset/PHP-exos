@@ -538,9 +538,64 @@ En résumé : une interface définit uniquement des obligations sans aucune lo
 
 **Quelle est la différence entre une erreur et une exception ?**
 
+``Erreur`` : C’est un problème qui interrompt l’exécution normale du script. Exemple : appel à une fonction inexistante.
+
+``Exception`` : C’est un objet qui représente une erreur prévue et que l’on peut attraper (``catch``) pour gérer proprement la situation. Avec les exceptions, on peut éviter que le script se termine brutalement.
+
 **Comment utiliser ``try``, ``catch``, ``finally`` ?**
 
+``try`` : On place le code qui peut générer une exception.
+
+``catch`` : On intercepte l’exception et on décide quoi faire.
+
+``finally`` : Bloc optionnel qui s’exécute dans tous les cas (qu’il y ait une exception ou pas).
+
+```php
+
+try {
+    // Code qui peut lancer une exception
+    if (!file_exists("data.txt")) {
+        throw new Exception("Le fichier est introuvable !");
+    }
+    echo "Fichier trouvé !";
+} catch (Exception $e) {
+    // Gestion de l'erreur
+    echo "Erreur : " . $e->getMessage();
+} finally {
+    // Code qui s'exécute dans tous les cas
+    echo "Fin du processus.";
+}
+
+```
+
 **Quelle est la fonction pour définir une fonction de gestion d’erreur personnalisée ?**
+
+La fonction est ``set_error_handler()``. Elle permet de rediriger les erreurs PHP classiques vers une fonction personnalisée.
+
+Dans une fonction de gestion d’erreur personnalisée (avec ``set_error_handler()``), les paramètres qui arrivent automatiquement sont :
+
+``$errno`` : Le code numérique du type d’erreur (par exemple : ``E_WARNING``, ``E_NOTICE``, ``E_ERROR``, etc.).
+
+``$errstr`` : Le message d’erreur.
+
+``$errfile`` : Le fichier dans lequel l’erreur s’est produite.
+
+``$errline`` : Le numéro de ligne où l’erreur est survenue.
+
+```php
+
+function monGestionnaireErreur($errno, $errstr, $errfile, $errline) {
+    echo "Erreur [$errno] : $errstr dans $errfile à la ligne $errline";
+}
+
+set_error_handler("monGestionnaireErreur");
+
+// Déclenchons une erreur (variable non définie)
+echo $varNonDefinie;
+
+// Résultat -> Erreur [8] : Undefined variable $varNonDefinie dans /var/www/index.php à la ligne 8
+
+```
 
 ---
 

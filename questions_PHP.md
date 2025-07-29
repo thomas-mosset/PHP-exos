@@ -670,9 +670,217 @@ session_destroy();
 
 **Quelles sont les bonnes pratiques pour éviter les injections SQL ?**
 
+Pour éviter les injections SQL, on ne doit jamais insérer directement les données utilisateur dans une requête SQL.
+Les bonnes pratiques :
+
+-- Utiliser des requêtes préparées et des paramètres bindés (PDO ou MySQLi).
+
+-- Ne jamais faire confiance aux données reçues : valider et filtrer systématiquement.
+
+-- Échapper les caractères si on ne peut pas utiliser de requêtes préparées.
+
+-- Protéger les formulaires côté front et côté serveur.
+
+```php
+
+$stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email");
+$stmt->bindParam(':email', $_POST['email'], PDO::PARAM_STR);
+$stmt->execute();
+
+```
+
 **Qu’est-ce que ``htmlspecialchars()`` et pourquoi l’utiliser ?**
 
+``htmlspecialchars()`` empêche l’interprétation de certains caractères spéciaux HTML en les transformant en entités HTML.
+
+C’est une protection de base contre les attaques XSS (injections de code HTML/JavaScript).
+
+| HTML  | Transformé en |
+| :---: |:---:|
+| & | ``&amp`` |
+| " | ``&quot;`` |
+| ' | ``&#039;`` |
+| < | ``&lt;`` |
+| > | ``&gt;`` |
+
+```php
+
+echo htmlspecialchars('<script>alert("XSS")</script>');
+// Affichera : &lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;
+
+```
+
 **Quelle est la différence entre ``include``, ``require``, ``include_once`` et ``require_once`` ?**
+
+``include`` : insère le fichier, génère un *warning* si le fichier est introuvable mais continue le script.
+
+``require`` : insère le fichier, génère une *erreur* fatale si le fichier est introuvable et stoppe le script.
+
+``include_once`` : comme ``include``, mais ne l’inclut qu’une seule fois même si on l’appelle plusieurs fois.
+
+``require_once`` : comme ``require``, mais ne l’inclut qu’une seule fois même si on l’appelle plusieurs fois.
+
+```php
+
+require_once "config.php"; // Obligatoire et une seule fois
+include "menu.php"; // Optionnel
+
+```
+
+**Qu’est-ce qu’une attaque CSRF et comment s’en protéger ?**
+
+Une attaque ``CSRF`` (*Cross Site Request Forgery*) force un utilisateur connecté à exécuter une action à son insu.
+
+Pour se protéger, il faut utiliser un ``token CSRF`` unique dans les formulaires et le vérifier côté serveur.
+
+```php
+
+// formulaire.php
+
+<?php
+
+session_start();
+
+// Génère un token unique si pas déjà créé
+if (!isset($_SESSION['token'])) {
+    $_SESSION['token'] = bin2hex(random_bytes(32));
+}
+
+?>
+
+```
+
+```html
+
+<!-- formulaire.php -->
+
+<form method="post" action="traitement.php">
+    <input type="text" name="commentaire" placeholder="Votre commentaire">
+    
+    <!-- On ajoute un champ caché avec le token -->
+    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['token']; ?>">
+
+    <button type="submit">Envoyer</button>
+</form>
+
+```
+
+```php
+
+// traitement.php
+
+session_start();
+
+// Vérifier si le token CSRF existe et correspond
+if (
+    !isset($_POST['csrf_token']) ||
+    $_POST['csrf_token'] !== $_SESSION['token']
+) {
+    die("Erreur CSRF : action non autorisée !");
+}
+
+// Si le token est bon, on peut traiter le formulaire
+$commentaire = htmlspecialchars($_POST['commentaire']);
+echo "Commentaire reçu : " . $commentaire;
+
+```
+
+**Qu’est-ce qu’une attaque XSS et comment s’en protéger ?**
+
+Une attaque ``XSS`` (*Cross-site scripting*) consiste à injecter des scripts dans une page affichée chez l’utilisateur. On utilise ``htmlspecialchars()`` pour se protéger et on n'affiche jamais directement une donnée reçue sans la filtrer.
+
+**Que signifie le principe du "*least privilege*" en sécurité ?**
+
+Le principe du "*least privilege*" en sécurité consiste à donner uniquement les droits strictement nécessaires aux comptes utilisateurs et services (base de données, serveur, etc.), pour limiter les dégâts en cas de faille.
+
+**Comment gérer correctement les mots de passe en PHP ?**
+
+Pour cela, il faut :
+
+-- Ne jamais stocker un mot de passe en clair ;
+
+-- Utiliser ``password_hash()`` (pour le hachage) pour créer un mot de passe sécurisé (avec un sel automatique et un algorithme fort) ;
+
+-- ``password_verify()`` pour la vérification ;
+
+-- Ne jamais inventer son propre système de hash ;
+
+```php
+
+// Hashage
+$hash = password_hash($password, PASSWORD_DEFAULT);
+
+// Vérification
+if (password_verify($password, $hash)) {
+    echo "Mot de passe correct !";
+}
+
+```
+
+**Comment sécuriser un upload de fichier en PHP ?**
+
+Pour sécuriser un upload de fichier en PHP, il faut :
+
+-- Vérifier l’extension et le type MIME pour n’accepter que certains formats ;
+
+-- Limiter la taille du fichier (via ``php.ini`` ou ``$_FILES['file']['size']``) ;
+
+-- Ne jamais faire confiance au nom du fichier : renommer le fichier et utiliser ``move_uploaded_file()`` pour le placer dans un dossier sûr ;
+
+-- Stocker les fichiers en dehors du dossier ``public`` quand c’est possible, pour éviter qu’ils soient exécutés directement depuis le navigateur ;
+
+-- Ne jamais exécuter un fichier uploadé ;
+
+```php
+
+<?php
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // 1. Limiter la taille (exemple 2 Mo)
+    if ($_FILES['fichier']['size'] > 2 * 1024 * 1024) {
+        die("Fichier trop volumineux !");
+    }
+
+    // 2. Vérification extension et MIME
+    $allowed_extensions = ['jpg', 'png', 'pdf'];
+    $file_extension = strtolower(pathinfo($_FILES['fichier']['name'], PATHINFO_EXTENSION));
+
+    if (!in_array($file_extension, $allowed_extensions)) {
+        die("Extension non autorisée !");
+    }
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime = finfo_file($finfo, $_FILES['fichier']['tmp_name']);
+    finfo_close($finfo);
+
+    $allowed_mimes = ['image/jpeg', 'image/png', 'application/pdf'];
+    if (!in_array($mime, $allowed_mimes)) {
+        die("Type MIME non autorisé !");
+    }
+
+    // 3. Renommer le fichier et le déplacer
+    $nouveau_nom = uniqid('', true) . '.' . $file_extension;
+    $destination = __DIR__ . '/uploads/' . $nouveau_nom;
+
+    if (move_uploaded_file($_FILES['fichier']['tmp_name'], $destination)) {
+        echo "Fichier uploadé avec succès.";
+    } else {
+        echo "Erreur lors de l'upload.";
+    }
+}
+
+?>
+
+```
+
+```html
+
+<form method="post" enctype="multipart/form-data">
+    <input type="file" name="fichier">
+    <button type="submit">Uploader</button>
+</form>
+
+```
 
 ---
 
